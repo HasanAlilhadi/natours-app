@@ -6,10 +6,20 @@ const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-si
 // if it does exist then go to next() function
 // if it doesn't exist then return res.status...
 exports.checkID = (req, res, next, val) => {
-  if (req.params.id * 1 > tours.length || req.params.id < 0) {
+  if (val * 1 > tours.length || val < 0) {
     return res.status(404).json({
       status: 'fail',
       message: 'Invalid ID',
+    });
+  }
+  next();
+};
+
+exports.checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Missing name or price',
     });
   }
   next();
