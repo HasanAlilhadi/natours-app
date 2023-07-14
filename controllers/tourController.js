@@ -33,9 +33,18 @@ exports.getAllTours = async (req, res) => {
       query = query.select('-__v');
     }
 
-    // 4) Limiting
+    // 4) Pagination
     const limit = req.query.limit || 10;
-    query.limit(limit);
+    const page = req.query.page || 1;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) {
+        throw new Error('This page does not exit');
+      }
+    }
 
     // EXECUTE QUERY
     const tours = await query;
@@ -53,7 +62,7 @@ exports.getAllTours = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: 'fail',
-      message: 'Error happened',
+      message: err.message,
     });
   }
 };
